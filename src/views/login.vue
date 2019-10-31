@@ -44,10 +44,24 @@
                         })
                         self.$http.post("/user/login", postData)
                             .then(function (res) {
-                                self.$router.push({name:"home"});
+                                if (res.data.status == 0){
+                                    self.$router.push({name: "home"});
+                                }else{
+                                    self.$message({
+                                        showClose: true,
+                                        message: '账号或密码错误',
+                                        type: 'warning',
+                                        duration: 3000
+                                    });
+                                }
                             })
                             .catch(function (err) {
-                                console.log(err);
+                                self.$message({
+                                    showClose: true,
+                                    message: '服务器错误',
+                                    type: 'error',
+                                    duration: 3000
+                                });
                             })
                     } else {
                         //校验不通过
