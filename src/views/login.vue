@@ -42,7 +42,7 @@
                             name: self.ruleForm.name,
                             pwd: self.ruleForm.pwd
                         })
-                        self.$http.post("/user/login", postData)
+                        self.$http.post("/back/user/login", postData)
                             .then(function (res) {
                                 if (res.data.status == 0){
                                     self.$router.push({name: "home"});
@@ -81,5 +81,4 @@
         width: 400px;
         margin: 235px auto;
     }
-
 </style>
