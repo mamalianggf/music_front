@@ -28,21 +28,13 @@
                 const self = this;
                 self.$http.get("/back/user/validateRepeatName?name=" + value)
                     .then(function (res) {
-                        if (res.data.status == 0) {
+                        if (res.data.status == 204) {
                             callback(new Error(res.data.message));
-                        } else if (res.data.status == 1) {
+                        } else if (res.data.status == 500) {
                             callback(new Error(res.data.message));
                         }
                         callback();
                     })
-                    .catch(function (err) {
-                        self.$message({
-                            showClose: true,
-                            message: "服务器报错",
-                            type: 'warning',
-                            duration: 3000//延迟3秒自动关闭
-                        });
-                    });
             };
             var validateConfirmPwd = (rule, value, callback) => {
                 if (value !== this.ruleForm.pwd) {
@@ -89,9 +81,9 @@
                         })
                         self.$http.post("/back/user/register", postData)
                             .then(function (res) {
-                                if (res.data.status == 0) {
+                                if (res.data.status == 200) {
+                                    self.$cookies.set("token", res.data.result.token, 60 * 60 * 24);//秒为单位
                                     self.$router.push({name: "home"});
-                                    //todo 塞cookie
                                 } else {
                                     self.$message({
                                         showClose: true,
@@ -100,14 +92,6 @@
                                         duration: 3000//延迟3秒自动关闭
                                     });
                                 }
-                            })
-                            .catch(function (err) {
-                                self.$message({
-                                    showClose: true,
-                                    message: err.data.message,
-                                    type: 'error',
-                                    duration: 3000
-                                });
                             })
                     } else {
                         return false//校验不通过

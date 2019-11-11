@@ -44,7 +44,8 @@
                         })
                         self.$http.post("/back/user/login", postData)
                             .then(function (res) {
-                                if (res.data.status == 0){
+                                if (res.data.status == 200){
+                                    self.$cookies.set("token", res.data.result.token, 60 * 60 * 24);//秒为单位
                                     self.$router.push({name: "home"});
                                 }else{
                                     self.$message({
@@ -54,14 +55,6 @@
                                         duration: 3000
                                     });
                                 }
-                            })
-                            .catch(function (err) {
-                                self.$message({
-                                    showClose: true,
-                                    message: '服务器错误',
-                                    type: 'error',
-                                    duration: 3000
-                                });
                             })
                     } else {
                         //校验不通过
