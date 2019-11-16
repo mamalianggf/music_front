@@ -1,17 +1,25 @@
 <template>
-    <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-position="left" label-width="100px"
-             class="demo-ruleForm">
-        <el-form-item label="账号" prop="name">
-            <el-input v-model="ruleForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="密码" prop="pwd">
-            <el-input v-model="ruleForm.pwd" show-password></el-input>
-        </el-form-item>
-        <el-form-item>
-            <el-button type="primary" @click="submitForm('ruleForm')">登录</el-button>
-            <el-button @click="resetForm('ruleForm')">重置</el-button>
-        </el-form-item>
-    </el-form>
+    <div>
+        <div class="block">
+            <el-image src="/file/home/fox.png" class="demo-login" @click="returnHome">
+            </el-image>
+        </div>
+        <div class="block">
+            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-position="left" label-width="100px"
+                     class="demo-ruleForm">
+                <el-form-item label="账号" prop="name">
+                    <el-input v-model="ruleForm.name"></el-input>
+                </el-form-item>
+                <el-form-item label="密码" prop="pwd">
+                    <el-input v-model="ruleForm.pwd" show-password></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="submitForm('ruleForm')">登录</el-button>
+                    <el-button @click="resetForm('ruleForm')">重置</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -44,13 +52,13 @@
                         })
                         self.$http.post("/back/user/login", postData)
                             .then(function (res) {
-                                if (res.data.status == 200){
+                                if (res.data.status == 200) {
                                     self.$cookies.set("token", res.data.result.token, 60 * 60 * 24);//秒为单位
                                     self.$router.push({name: "home"});
-                                }else{
+                                } else {
                                     self.$message({
                                         showClose: true,
-                                        message: '账号或密码错误',
+                                        message: res.data.message,
                                         type: 'warning',
                                         duration: 3000
                                     });
@@ -64,6 +72,9 @@
             },
             resetForm(formName) {
                 this.$refs[formName].resetFields();
+            },
+            returnHome() {
+                this.$router.push({name: "home"})
             }
         }
     }
@@ -72,6 +83,14 @@
 <style scoped>
     .demo-ruleForm {
         width: 400px;
-        margin: 235px auto;
+        margin: 20px auto;
+    }
+
+    .demo-login {
+        width: 100px;
+        height: 100px;
+        margin: 80px auto;
+        display: block;
+        cursor: pointer;
     }
 </style>

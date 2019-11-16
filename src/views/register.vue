@@ -1,23 +1,31 @@
 <template>
-    <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-position="left" label-width="100px"
-             class="demo-ruleForm">
-        <el-form-item label="账号" prop="name">
-            <el-input v-model="ruleForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-            <el-input v-model="ruleForm.email"></el-input>
-        </el-form-item>
-        <el-form-item label="密码" prop="pwd">
-            <el-input v-model="ruleForm.pwd" show-password></el-input>
-        </el-form-item>
-        <el-form-item label="确认密码" prop="confirmPwd">
-            <el-input v-model="ruleForm.confirmPwd" show-password></el-input>
-        </el-form-item>
-        <el-form-item>
-            <el-button type="primary" @click="submitForm('ruleForm')">注册</el-button>
-            <el-button @click="resetForm('ruleForm')">重置</el-button>
-        </el-form-item>
-    </el-form>
+    <div>
+        <div class="block">
+            <el-image src="/file/home/fox.png" class="demo-register" @click="returnHome">
+            </el-image>
+        </div>
+        <div class="block">
+            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-position="left" label-width="100px"
+                     class="demo-ruleForm">
+                <el-form-item label="账号" prop="name">
+                    <el-input v-model="ruleForm.name"></el-input>
+                </el-form-item>
+                <el-form-item label="邮箱" prop="email">
+                    <el-input v-model="ruleForm.email"></el-input>
+                </el-form-item>
+                <el-form-item label="密码" prop="pwd">
+                    <el-input v-model="ruleForm.pwd" show-password></el-input>
+                </el-form-item>
+                <el-form-item label="确认密码" prop="confirmPwd">
+                    <el-input v-model="ruleForm.confirmPwd" show-password></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="submitForm('ruleForm')">注册</el-button>
+                    <el-button @click="resetForm('ruleForm')">重置</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -56,7 +64,7 @@
                         {validator: validateRepeatName, trigger: 'blur'}
                     ],
                     email: [
-                        {required: true, message: '请输入账号', trigger: 'blur'},
+                        {required: true, message: '请输入邮箱', trigger: 'blur'},
                         {type: 'email', message: '请输入正确的邮箱', trigger: 'blur'},
                     ],
                     pwd: [
@@ -82,16 +90,15 @@
                         self.$http.post("/back/user/register", postData)
                             .then(function (res) {
                                 if (res.data.status == 200) {
-                                    self.$cookies.set("token", res.data.result.token, 60 * 60 * 24);//秒为单位
-                                    self.$router.push({name: "home"});
-                                } else {
-                                    self.$message({
-                                        showClose: true,
-                                        message: res.data.message,
-                                        type: 'warning',
-                                        duration: 3000//延迟3秒自动关闭
-                                    });
+                                    self.$router.push({name: "login"});
                                 }
+                                self.$message({
+                                    showClose: true,
+                                    message: res.data.message,
+                                    type: 'warning',
+                                    duration: 3000//延迟3秒自动关闭
+                                });
+
                             })
                     } else {
                         return false//校验不通过
@@ -100,6 +107,9 @@
             },
             resetForm(formName) {
                 this.$refs[formName].resetFields();
+            },
+            returnHome() {
+                this.$router.push({name: "home"})
             }
         }
     }
@@ -108,6 +118,14 @@
 <style scoped>
     .demo-ruleForm {
         width: 400px;
-        margin: 170px auto;
+        margin: 20px auto;
+    }
+
+    .demo-register {
+        width: 100px;
+        height: 100px;
+        margin: 80px auto;
+        display: block;
+        cursor: pointer;
     }
 </style>
