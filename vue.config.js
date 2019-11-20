@@ -1,11 +1,11 @@
 module.exports = {
     //项目地址加一个二级目录;默认值为'/'
-    publicPath: 'music_front',
+    publicPath: process.env.PUBLIC_PATH,
     devServer: {
-        port: 8081,// 端口
+        port: process.env.DEVSERVER_PORT,// 端口
         proxy:{
             '/back': {
-                target: 'http://10.25.163.22:8082',
+                target: process.env.DEVSERVER_PROXY_BACK_TARGET,
                 ws: true,
                 changeOrigin: true,
                 pathRewrite:{  //需要rewrite重写的, 如果在服务器端做了处理则可以不要这段
@@ -13,7 +13,7 @@ module.exports = {
                 }
             },
             '/file': {
-                target: 'http://106.15.248.92:8083',
+                target: 'process.env.DEVSERVER_PROXY_FILE_TARGET',
                 ws: true,
                 changeOrigin: true,
                 pathRewrite:{

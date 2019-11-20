@@ -17,7 +17,6 @@ Axios.interceptors.request.use(function (config) {
             router.push({name: "login"});
         }
     }
-    //todo 1：vue的代理防止用户直接访问后台url 2：前台和后台之间约定一个只有双方能看懂并用来辨别来源的方式暂定为请求头中的referer
     return config;
 }, function (error) {
     // 对请求错误做些什么
@@ -30,7 +29,7 @@ Axios.interceptors.response.use(function (response) {
     return response;
 }, function (error) {
     // 对响应错误做点什么
-    Vue.$message({
+    Vue.prototype.$message({
         showClose: true,
         message: '响应拦截服务器错误',
         type: 'error',
