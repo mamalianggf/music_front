@@ -38,9 +38,9 @@
                     .then(function (res) {
                         if (res.data.status == 204) {
                             callback(new Error(res.data.message));
-                        } else if (res.data.status == 500) {
+                        } /*else if (res.data.status == 500) {
                             callback(new Error(res.data.message));
-                        }
+                        }*/
                         callback();
                     })
             };
@@ -98,7 +98,6 @@
                                     type: 'warning',
                                     duration: 3000//延迟3秒自动关闭
                                 });
-
                             })
                     } else {
                         return false//校验不通过

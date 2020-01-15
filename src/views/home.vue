@@ -1,5 +1,5 @@
 <template>
-    <el-container>
+    <el-container class="home-container">
         <!--#todo 不写这个行内样式浏览器会莫名出现出现style="height:60px"这个行内样式 -->
         <el-header class="el-header-top" style="height:61px">
             <el-col :span="2" :offset="2" class="div-height">
@@ -29,6 +29,11 @@
                         <el-dropdown-item command="a">个人信息</el-dropdown-item>
                         <el-dropdown-item command="b">我的收藏</el-dropdown-item>
                         <el-dropdown-item command="c">购物车</el-dropdown-item>
+                        <el-dropdown-item command="d">
+                            <el-badge :value="12">
+                                通知
+                            </el-badge>
+                        </el-dropdown-item>
                         <el-dropdown-item disabled command="d">待定</el-dropdown-item>
                         <el-dropdown-item divided command="e">退出</el-dropdown-item>
                     </el-dropdown-menu>
@@ -37,6 +42,7 @@
         </el-header>
 
         <el-main>
+            <!--轮播-->
             <div class="block">
                 <el-carousel>
                     <el-carousel-item>
@@ -61,10 +67,12 @@
                     </el-carousel-item>
                 </el-carousel>
             </div>
+
+            <!--歌曲-->
             <div v-for="song in songs" class="song-div">
                 <div class="song" style="height: 70px">
                     <div class="song-image-shade">
-                        <i class="el-icon-video-play" style="color: white"></i>
+                        <i class="el-icon-video-play audio_icon" @click="switchPlay(song)" :ref="'icon'+song.id"></i>
                     </div>
                     <el-col :span="3">
                         <el-image :src="song.songImg" class="song-image"></el-image>
@@ -92,27 +100,32 @@
                     </el-col>
                 </div>
                 <div class="song-tag">
-                    <el-tag type="info" effect="plain">标签一</el-tag>
-                    <el-tag type="info" effect="plain">标签二</el-tag>
-                    <el-tag type="info" effect="plain">标签三</el-tag>
+                    <el-tag type="info" effect="plain" v-for="styleId in (song.styleIds.split(','))">{{styleId}}
+                    </el-tag>
                 </div>
             </div>
+            <audio songId="" src="" ref="video"></audio>
+            <!--分页-->
             <div class="block el-pagination-bottom">
                 <el-pagination
                         @size-change="handleSizeChange"
                         @current-change="handleCurrentChange"
-                        :current-page.sync="currentPage"
-                        :page-size="pageSize"
+                        :current-page.sync="page.currentPage"
+                        :page-size="page.pageSize"
                         layout="prev, pager, next, jumper"
-                        :total="total">
+                        :total="page.total">
                 </el-pagination>
             </div>
         </el-main>
-        <div class="advertising-board-left"><!-- 广告位直接放图片 -->
+
+        <!-- 广告位直接放图片 -->
+        <div class="advertising-board-left">
         </div>
         <div class="advertising-board-right">
         </div>
-        <!--<el-footer class="el-footer-bottom">Footer</el-footer>-->
+
+        <el-footer class="el-footer-bottom">
+        </el-footer>
     </el-container>
 </template>
 
@@ -122,12 +135,19 @@
         name: 'home',
         data() {
             return {
-                currentPage: 1,
-                pageSize: 3,
-                total: 0,
+                page: {
+                    currentPage: 1,
+                    pageSize: 3,
+                    total: 0
+                },
                 user: {
                     id: "",
                     name: ""
+                },
+                song: {
+                    currentId: "",
+                    currentSongSrc: "",
+                    playing: false
                 },
                 songs: []
             };
@@ -141,15 +161,13 @@
                         if (res.data.status == 200) {
                             self.$data.user.name = res.data.result.user.name;
                             self.$data.user.id = res.data.result.user.id;
-                        } else {
-                            console.log(res.data.message);
                         }
                     })
             }
-            self.$http.get("/back/song/listSongs?pageNum=" + self.$data.currentPage + "&pageSize=" + self.$data.pageSize)
+            self.$http.get("/back/song/listSongs?pageNum=" + self.$data.page.currentPage + "&pageSize=" + self.$data.page.pageSize)
                 .then(function (res) {
                     self.$data.songs = res.data.result.songs.list;
-                    self.$data.total = res.data.result.songs.total;
+                    self.$data.page.total = res.data.result.songs.total;
                 })
 
         },
@@ -157,13 +175,7 @@
             handleSelectLeft(key, keyPath) {
             },
             handleSelectRight(key, keyPath) {
-                const self = this;
-                if (key === "1") {
-                    self.$router.push({name: "login"});
-                }
-                if (key === "2") {
-                    self.$router.push({name: "register"});
-                }
+                key === "1" ? this.$router.push({name: "login"}) : this.$router.push({name: "register"});
             },
             handleCommand(command) {
                 const self = this;
@@ -177,18 +189,46 @@
             },
             handleCurrentChange(val) {
                 const self = this;
-                self.$http.get("/back/song/listSongs?pageNum=" + val + "&pageSize=" + self.$data.pageSize)
+                self.$http.get("/back/song/listSongs?pageNum=" + val + "&pageSize=" + self.$data.page.pageSize)
                     .then(function (res) {
                         self.$data.songs = res.data.result.songs.list;
-                        self.$data.total = res.data.result.songs.total;
+                        self.$data.page.total = res.data.result.songs.total;
                     })
+            },
+            switchPlay(val) {
+                const self = this;
+                //todo 直接修改data并不能绑定上audio的src和songId,现在是通过ref.src和ref.songId实现的
+                if (self.$data.song.playing) {//当前有音乐播放
+                    self.$refs[`icon` + self.$data.song.currentId][0].className = "el-icon-video-play audio_icon";
+                    self.$data.song.playing = false;
+                    self.$refs.video.pause();
+                    if (val.id !== self.$data.song.currentId) {
+                        self.$data.song.currentId = val.id;
+                        self.$refs.video.songId = val.id;
+                        self.$data.song.currentSongSrc = val.src;
+                        self.$refs.video.src = val.src;
+                        self.$data.song.playing = true;
+                        self.$refs[`icon` + self.$data.song.currentId][0].className = "el-icon-video-pause audio_icon";
+                        self.$refs.video.play();
+                    }
+                } else {//当前没音乐播放
+                    if (val.id !== self.$data.song.currentId) {//
+                        self.$data.song.currentId = val.id;
+                        self.$refs.video.songId = val.id;
+                        self.$data.song.currentSongSrc = val.src;
+                        self.$refs.video.src = val.src;
+                    }
+                    self.$refs[`icon` + self.$data.song.currentId][0].className = "el-icon-video-pause audio_icon";
+                    self.$data.song.playing = true;
+                    self.$refs.video.play();
+                }
             }
         }
     }
 </script>
 
 <style>
-    .el-container {
+    .home-container {
         width: 80%;
         text-align: center;
         margin: 50px auto;
@@ -213,11 +253,6 @@
     .el-dropdown-top {
         height: 40px;
         margin-top: 25%;
-    }
-
-    .el-footer {
-        line-height: 60px;
-        padding: 0px 0px;
     }
 
     .el-carousel__item h3 {
@@ -305,6 +340,15 @@
         margin: 0px 20px;
     }
 
+    audio {
+        display: none;
+    }
+
+    .audio_icon {
+        color: white;
+        cursor: pointer;
+    }
+
     .advertising-board-left {
         width: 130px;
         height: 170px;
@@ -324,7 +368,20 @@
     }
 
     .el-pagination-bottom {
-        marigin-top: 30px
+        margin-top: 30px
     }
+
+    .el-footer-bottom {
+        display: block;
+        position: fixed;
+        bottom: 0px;
+        left: 0px;
+        width: 100%;
+        z-index: 100;
+        background-color: #333333;
+        line-height: 60px;
+        padding: 0px 0px;
+    }
+
 
 </style>

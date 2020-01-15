@@ -13,7 +13,7 @@ module.exports = {
                 }
             },
             '/file': {
-                target: 'process.env.DEVSERVER_PROXY_FILE_TARGET',
+                target: process.env.DEVSERVER_PROXY_FILE_TARGET,
                 ws: true,
                 changeOrigin: true,
                 pathRewrite:{

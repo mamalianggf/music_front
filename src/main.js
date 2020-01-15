@@ -25,13 +25,22 @@ Axios.interceptors.request.use(function (config) {
 
 // 添加响应拦截器
 Axios.interceptors.response.use(function (response) {
-    // 对响应数据做点什么
+    // 对响应数据做点什么;处理ExceptionHandler对象的返回
+    if (response.data.status == 500) {
+        Vue.prototype.$message({
+            showClose: true,
+            message: response.data.message,
+            type: 'error',
+            duration: 3000
+        });
+        return Promise.reject(response.data.message);
+    }
     return response;
 }, function (error) {
     // 对响应错误做点什么
     Vue.prototype.$message({
         showClose: true,
-        message: '响应拦截服务器错误',
+        message: '未处理的服务器错误',
         type: 'error',
         duration: 3000
     });
